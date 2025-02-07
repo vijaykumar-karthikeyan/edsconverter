@@ -1,8 +1,5 @@
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin-top: 50px;
-  }
-  h1 {
-    color: #333;
-  }
+body { font-family: Arial, sans-serif; text-align: center; }
+.container { max-width: 600px; margin: auto; }
+.grid { display: grid; gap: 5px; justify-content: center; }
+.well { width: 25px; height: 25px; border: 1px solid #333; cursor: pointer; }
+.selected { background-color: #007bff; color: white; }

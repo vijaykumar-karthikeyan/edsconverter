@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>My Desktop App</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <h1>Hello, World!</h1>
-    <p>Welcome to my desktop app.</p>
-  </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload .EDS File</h1>
+        <input type="file" id="fileInput" accept=".eds">
+        <h2>Select Wells</h2>
+        <div id="wellContainer" class="grid"></div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
 </html>

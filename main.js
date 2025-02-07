@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+/*const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -26,4 +26,21 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+*/
+
+const { app, BrowserWindow, dialog } = require('electron');
+const path = require('path');
+
+let mainWindow;
+
+app.whenReady().then(() => {
+    mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    mainWindow.loadFile('index.html');
 });
