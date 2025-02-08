@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDS Converter</title>
+    <title>EDS Converter with Well Plate</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,7 +21,7 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             width: 90%;
-            max-width: 600px;
+            max-width: 800px;
         }
 
         h1 {
@@ -35,19 +35,21 @@
             border-radius: 8px;
             padding: 2rem;
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             transition: border-color 0.3s ease;
-            
-        }
-        .upload-section p {
-            margin: 0;
-            word-break: break-all;
-            padding: 8px;
-            min-height: 24px; /* Maintain vertical space */
         }
 
         .upload-section:hover {
             border-color: #007bff;
+        }
+
+        .upload-section p {
+            margin: 0;
+            word-break: break-all;
+            padding: 8px;
+            min-height: 24px;
+            color: #666;
+            transition: color 0.3s ease;
         }
 
         .upload-button {
@@ -66,18 +68,88 @@
             background-color: #0056b3;
         }
 
-        .wells-section {
-            margin-bottom: 2rem;
+        .wells-section h3 {
+            text-align: center;
+            margin-bottom: 1rem;
         }
 
-        .wells-numbers {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 1rem;
-            margin-top: 0.5rem;
-            overflow-x: auto;
-            white-space: nowrap;
-            font-family: monospace;
+        .plate-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .wells-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 30px);
+            gap: 4px;
+            margin: 0 auto;  /* Center the grid */
+        }
+
+        .column-headers {
+            grid-column: 2;
+            display: grid;
+            grid-template-columns: repeat(12, 30px);
+            gap: 4px;
+            margin-bottom: 5px;
+            margin-left: 30px;
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            font-size: 0.8em;
+            color: #666;
+            user-select: none;
+        }
+
+        .row-labels {
+            width: 30px;
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            gap: 4px;
+            padding-right: 10px;
+        }
+
+        .row-label {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-size: 0.8em;
+            color: #666;
+            user-select: none;
+            height: 30px;
+        }
+
+        .well {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .well.selected {
+            background-color: #2196F3;
+        }
+
+        .well-label {
+            font-size: 0.6em;
+            color: #666;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .well.selected .well-label {
+            color: white;
         }
 
         .process-button {
@@ -90,10 +162,35 @@
             cursor: pointer;
             font-size: 1.1rem;
             transition: background-color 0.3s ease;
+            margin-top: 1rem;
         }
 
         .process-button:hover {
             background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .well {
+                width: 20px;
+                height: 20px;
+            }
+            .well-label {
+                font-size: 0.5em;
+            }
+            .column-headers {
+                grid-template-columns: repeat(12, 20px);
+                margin-left: 20px;
+            }
+            .column-header {
+                width: 20px;
+                height: 20px;
+            }
+            .row-labels {
+                width: 20px;
+            }
+            .wells-grid {
+                grid-template-columns: repeat(12, 20px);
+            }
         }
     </style>
 </head>
@@ -101,34 +198,92 @@
     <div class="container">
         <h1>EDS Converter</h1>
         
-        <!-- Modified Upload Section -->
         <div class="upload-section">
             <p id="instructionText">Drag or Upload Your EDS or CSV File</p>
+            <div style="margin-bottom: 1.5rem;"></div>
             <label class="upload-button">
-                Choose File
+                Upload
                 <input type="file" id="fileInput" accept=".eds,.csv,text/csv" hidden>
             </label>
         </div>
-        
-        <script>
-            document.getElementById('fileInput').addEventListener('change', function(e) {
-                const instructionText = document.getElementById('instructionText');
-                if (this.files.length > 0) {
-                    instructionText.textContent = this.files[0].name;
-                } else {
-                    instructionText.textContent = 'Drag or Upload Your EDS or CSV File';
-                }
-            });
-        </script>
 
         <div class="wells-section">
             <h3>Choose Wells</h3>
-            <div class="wells-numbers">
-                1234567891011121314151617181920
+            <div class="plate-container">
+                <div class="wells-grid"></div>
             </div>
         </div>
 
         <button class="process-button">Process Data</button>
     </div>
+
+    <script>
+        // File upload handling
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const instructionText = document.getElementById('instructionText');
+            if (this.files.length > 0) {
+                instructionText.textContent = this.files[0].name;
+                instructionText.style.color = '#333';
+            } else {
+                instructionText.textContent = 'Drag or Upload Your EDS or CSV File';
+                instructionText.style.color = '#666';
+            }
+        });
+
+        // Well plate creation
+        const wellsGrid = document.querySelector('.wells-grid');
+        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        let isMouseDown = false;
+
+        // Create wells only
+        rows.forEach((rowLabel) => {
+            for (let i = 1; i <= 12; i++) {
+                const well = document.createElement('div');
+                well.className = 'well';
+                well.dataset.well = `${rowLabel}${i}`;
+                
+                // Add well label
+                const wellLabel = document.createElement('span');
+                wellLabel.className = 'well-label';
+                wellLabel.textContent = `${rowLabel}${i}`;
+                well.appendChild(wellLabel);
+
+                // Keep event listeners
+                well.addEventListener('mousedown', (e) => {
+                    isMouseDown = true;
+                    well.classList.toggle('selected');
+                });
+
+                well.addEventListener('mouseenter', (e) => {
+                    if (isMouseDown) {
+                        well.classList.toggle('selected');
+                    }
+                });
+
+                wellsGrid.appendChild(well);
+            }
+        });
+
+        // Mouse event handling
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        document.addEventListener('selectstart', (e) => {
+            if (isMouseDown) e.preventDefault();
+        });
+
+        // Process button handler
+        document.querySelector('.process-button').addEventListener('click', () => {
+            const selectedWells = Array.from(document.querySelectorAll('.well.selected'))
+                .reduce((dict, well) => {
+                    dict[well.dataset.well] = true;
+                    return dict;
+                }, {});
+            
+            console.log('Selected Wells:', selectedWells);
+            alert(`Selected Wells:\n${Object.keys(selectedWells).join(', ')}`);
+        });
+    </script>
 </body>
 </html>
