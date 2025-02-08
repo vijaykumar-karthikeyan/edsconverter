@@ -1,147 +1,127 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <link href="https://fonts.googleapis.com/css?family=Inter&display=swap" rel="stylesheet" />
-    <link href="./style.css" rel="stylesheet" />
-    <title>Document</title>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDS Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .upload-section {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #007bff;
+        }
+
+        .upload-button {
+            background-color: #007bff;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-button:hover {
+            background-color: #0056b3;
+        }
+
+        .wells-section {
+            margin-bottom: 2rem;
+        }
+
+        .wells-numbers {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            font-family: monospace;
+        }
+
+        .process-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .process-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
 <body>
-    <div class="v1_2"><span class="v1_3">Drag or Upload Your EDS or CSV File</span><span class="v9_19">Choose
-            Wells</span>
-        <div class="v9_15">
-            <div class="v4_7">
-                <div class="v4_6">
-                    <div class="v1_13">
-                        <div class="v1_4"></div>
-                    </div>
-                    <div class="v4_5">
-                        <div class="v1_15"></div><span class="v4_4">Upload</span>
-                    </div>
-                </div>
+    <div class="container">
+        <h1>EDS Converter</h1>
+        
+        <!-- Modified Upload Section -->
+        <div class="upload-section">
+            <p id="instructionText">Drag or Upload Your EDS or CSV File</p>
+            <label class="upload-button">
+                Choose File
+                <input type="file" id="fileInput" accept=".eds,.csv,text/csv" hidden>
+            </label>
+        </div>
+        
+        <script>
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const instructionText = document.getElementById('instructionText');
+                if (this.files.length > 0) {
+                    instructionText.textContent = this.files[0].name;
+                } else {
+                    instructionText.textContent = 'Drag or Upload Your EDS or CSV File';
+                }
+            });
+        </script>
+
+        <div class="wells-section">
+            <h3>Choose Wells</h3>
+            <div class="wells-numbers">
+                1234567891011121314151617181920
             </div>
         </div>
-        <div class="v9_11">
-            <div class="v9_12"></div><span class="v9_13">Process Data</span>
-        </div>
-        <div class="v13_136">
-            <div class="v13_121">
-                <div class="v13_120">
-                    <div class="v13_118">
-                        <div class="v13_107">
-                            <div class="v13_3"></div>
-                            <div class="v13_108">
-                                <div class="v13_17"></div>
-                            </div>
-                            <div class="v13_19"></div>
-                            <div class="v13_27"></div>
-                            <div class="v13_35"></div>
-                            <div class="v13_43"></div>
-                            <div class="v13_51"></div>
-                            <div class="v13_59"></div>
-                            <div class="v13_67"></div>
-                            <div class="v13_75"></div>
-                            <div class="v13_83"></div>
-                            <div class="v13_91"></div>
-                            <div class="v13_99"></div>
-                            <div class="v13_4"></div>
-                            <div class="v13_20"></div>
-                            <div class="v13_28"></div>
-                            <div class="v13_36"></div>
-                            <div class="v13_44"></div>
-                            <div class="v13_52"></div>
-                            <div class="v13_60"></div>
-                            <div class="v13_68"></div>
-                            <div class="v13_76"></div>
-                            <div class="v13_84"></div>
-                            <div class="v13_92"></div>
-                            <div class="v13_100"></div>
-                            <div class="v13_11"></div>
-                            <div class="v13_21"></div>
-                            <div class="v13_29"></div>
-                            <div class="v13_37"></div>
-                            <div class="v13_45"></div>
-                            <div class="v13_53"></div>
-                            <div class="v13_61"></div>
-                            <div class="v13_69"></div>
-                            <div class="v13_77"></div>
-                            <div class="v13_85"></div>
-                            <div class="v13_93"></div>
-                            <div class="v13_101"></div>
-                            <div class="v13_12"></div>
-                            <div class="v13_22"></div>
-                            <div class="v13_30"></div>
-                            <div class="v13_38"></div>
-                            <div class="v13_46"></div>
-                            <div class="v13_54"></div>
-                            <div class="v13_62"></div>
-                            <div class="v13_70"></div>
-                            <div class="v13_78"></div>
-                            <div class="v13_86"></div>
-                            <div class="v13_94"></div>
-                            <div class="v13_102"></div>
-                            <div class="v13_13"></div>
-                            <div class="v13_23"></div>
-                            <div class="v13_31"></div>
-                            <div class="v13_39"></div>
-                            <div class="v13_47"></div>
-                            <div class="v13_55"></div>
-                            <div class="v13_63"></div>
-                            <div class="v13_71"></div>
-                            <div class="v13_79"></div>
-                            <div class="v13_87"></div>
-                            <div class="v13_95"></div>
-                            <div class="v13_103"></div>
-                            <div class="v13_14"></div>
-                            <div class="v13_24"></div>
-                            <div class="v13_32"></div>
-                            <div class="v13_40"></div>
-                            <div class="v13_48"></div>
-                            <div class="v13_56"></div>
-                            <div class="v13_64"></div>
-                            <div class="v13_72"></div>
-                            <div class="v13_80"></div>
-                            <div class="v13_88"></div>
-                            <div class="v13_96"></div>
-                            <div class="v13_104"></div>
-                            <div class="v13_15"></div>
-                            <div class="v13_25"></div>
-                            <div class="v13_33"></div>
-                            <div class="v13_41"></div>
-                            <div class="v13_49"></div>
-                            <div class="v13_57"></div>
-                            <div class="v13_65"></div>
-                            <div class="v13_73"></div>
-                            <div class="v13_81"></div>
-                            <div class="v13_89"></div>
-                            <div class="v13_97"></div>
-                            <div class="v13_105"></div>
-                            <div class="v13_16"></div>
-                            <div class="v13_18"></div>
-                            <div class="v13_26"></div>
-                            <div class="v13_34"></div>
-                            <div class="v13_42"></div>
-                            <div class="v13_50"></div>
-                            <div class="v13_58"></div>
-                            <div class="v13_66"></div>
-                            <div class="v13_74"></div>
-                            <div class="v13_82"></div>
-                            <div class="v13_90"></div>
-                            <div class="v13_98"></div>
-                            <div class="v13_106"></div>
-                        </div>
-                    </div><span class="v13_110">A</span><span class="v13_122">1</span><span
-                        class="v13_124">2</span><span class="v13_126">3</span><span class="v13_127">4</span><span
-                        class="v13_128">5</span><span class="v13_129">6</span><span class="v13_130">7</span><span
-                        class="v13_131">8</span><span class="v13_132">9</span><span class="v13_133">10</span><span
-                        class="v13_134">11</span><span class="v13_135">12</span><span class="v13_111">B</span><span
-                        class="v13_112">C</span><span class="v13_113">D</span><span class="v13_114">E</span><span
-                        class="v13_115">F</span><span class="v13_116">G</span>
-                </div><span class="v13_117">H</span>
-            </div>
-        </div>
+
+        <button class="process-button">Process Data</button>
     </div>
 </body>
-
 </html>
