@@ -285,5 +285,50 @@
             alert(`Selected Wells:\n${Object.keys(selectedWells).join(', ')}`);
         });
     </script>
+    <script>
+        
+        // Replace all process button handlers with this single one
+        document.querySelector('.process-button').addEventListener('click', async () => {
+            const processBtn = document.querySelector('.process-button');
+            try {
+                processBtn.disabled = true;
+                processBtn.textContent = 'Processing...';
+        
+                const selectedWells = Array.from(document.querySelectorAll('.well.selected'))
+                                        .map(well => well.dataset.well);
+                
+                const fileInput = document.getElementById('fileInput');
+                if (!fileInput.files[0]) {
+                    alert('Please upload a file first!');
+                    return;
+                }
+        
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('wells', JSON.stringify(selectedWells));
+        
+                const response = await fetch('http://localhost:5000/process', {
+                    method: 'POST',
+                    body: formData
+                });
+        
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Unknown error');
+                }
+        
+                const result = await response.json();
+                console.log('Result:', result);
+                alert(`Success: ${result.message}\nProcessed ${result.selected_wells.length} wells`);
+        
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                processBtn.disabled = false;
+                processBtn.textContent = 'Process Data';
+            }
+        });
+    </script>
 </body>
 </html>
