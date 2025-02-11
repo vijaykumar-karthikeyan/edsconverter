@@ -1,36 +1,4 @@
-/*const { app, BrowserWindow } = require('electron');
-const path = require('path');
-
-function createWindow() {
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-  });
-
-  // Load the index.html file
-  win.loadFile('index.html');
-}
-
-app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-*/
-
-const { app, BrowserWindow, dialog } = require('electron');
-const path = require('path');
+const { app, BrowserWindow, dialog, net } = require('electron');
 
 let mainWindow;
 
@@ -43,4 +11,15 @@ app.whenReady().then(() => {
         }
     });
     mainWindow.loadFile('index.html');
+});
+
+app.on('window-all-closed', () => {
+    // Ensure Flask cleanup is triggered before quitting
+    fetch('http://localhost:5000/cleanup')
+        .catch(err => console.error("Cleanup failed:", err))
+        .finally(() => {
+            if (process.platform !== 'darwin') {
+                app.quit();
+            }
+        });
 });

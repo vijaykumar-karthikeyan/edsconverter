@@ -77,11 +77,12 @@
             display: flex;
             justify-content: center;
             margin: 20px 0;
+            position: relative;
         }
 
         .wells-grid {
             display: grid;
-            grid-template-columns: repeat(12, 30px);
+            grid-template-columns: repeat(24, 30px); /* 24 columns for 384-well plate */
             gap: 4px;
             margin: 0 auto;  /* Center the grid */
         }
@@ -89,7 +90,7 @@
         .column-headers {
             grid-column: 2;
             display: grid;
-            grid-template-columns: repeat(12, 30px);
+            grid-template-columns: repeat(24, 30px);
             gap: 4px;
             margin-bottom: 5px;
             margin-left: 30px;
@@ -109,7 +110,7 @@
         .row-labels {
             width: 30px;
             display: grid;
-            grid-template-rows: repeat(8, 1fr);
+            grid-template-rows: repeat(16, 1fr); /* 16 rows for 384-well plate */
             gap: 4px;
             padding-right: 10px;
         }
@@ -169,6 +170,14 @@
             background-color: #218838;
         }
 
+        .drag-selection {
+            position: absolute;
+            border: 2px dashed #007bff;
+            background-color: rgba(0, 123, 255, 0.2);
+            pointer-events: none;
+            z-index: 10;
+        }
+
         @media (max-width: 768px) {
             .well {
                 width: 20px;
@@ -178,7 +187,7 @@
                 font-size: 0.5em;
             }
             .column-headers {
-                grid-template-columns: repeat(12, 20px);
+                grid-template-columns: repeat(24, 20px);
                 margin-left: 20px;
             }
             .column-header {
@@ -189,7 +198,7 @@
                 width: 20px;
             }
             .wells-grid {
-                grid-template-columns: repeat(12, 20px);
+                grid-template-columns: repeat(24, 20px);
             }
         }
     </style>
@@ -230,14 +239,14 @@
             }
         });
 
-        // Well plate creation
+        // Well plate creation for 384-well plate (16 rows, 24 columns)
         const wellsGrid = document.querySelector('.wells-grid');
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];  // 16 rows
         let isMouseDown = false;
+        let selectionBox = null;
 
-        // Create wells only
         rows.forEach((rowLabel) => {
-            for (let i = 1; i <= 12; i++) {
+            for (let i = 1; i <= 24; i++) {  // 24 columns
                 const well = document.createElement('div');
                 well.className = 'well';
                 well.dataset.well = `${rowLabel}${i}`;
@@ -248,7 +257,7 @@
                 wellLabel.textContent = `${rowLabel}${i}`;
                 well.appendChild(wellLabel);
 
-                // Keep event listeners
+                // Add event listeners for selection
                 well.addEventListener('mousedown', (e) => {
                     isMouseDown = true;
                     well.classList.toggle('selected');
@@ -264,36 +273,88 @@
             }
         });
 
-        // Mouse event handling
-        document.addEventListener('mouseup', () => {
-            isMouseDown = false;
+        // Mouse event handling for selection drag
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.plate-container')) {
+                isMouseDown = true;
+
+                // Get the plate container's offset position
+                const plateContainer = document.querySelector('.plate-container');
+                const containerRect = plateContainer.getBoundingClientRect();
+                
+                // Create a selection box
+                selectionBox = document.createElement('div');
+                selectionBox.className = 'drag-selection';
+                plateContainer.appendChild(selectionBox);
+
+                // Set the initial position of the selection box based on mouse coordinates
+                selectionBox.style.left = `${e.clientX - containerRect.left}px`;
+                selectionBox.style.top = `${e.clientY - containerRect.top}px`;
+            }
         });
 
-        document.addEventListener('selectstart', (e) => {
-            if (isMouseDown) e.preventDefault();
+        document.addEventListener('mousemove', (e) => {
+            if (isMouseDown && selectionBox) {
+                const plateContainer = document.querySelector('.plate-container');
+                const containerRect = plateContainer.getBoundingClientRect();
+                
+                const width = e.clientX - containerRect.left - parseInt(selectionBox.style.left);
+                const height = e.clientY - containerRect.top - parseInt(selectionBox.style.top);
+
+                // Update the size of the selection box
+                selectionBox.style.width = `${Math.abs(width)}px`;
+                selectionBox.style.height = `${Math.abs(height)}px`;
+
+                // Adjust the starting point if the mouse moves left or up
+                if (width < 0) {
+                    selectionBox.style.left = `${e.clientX - containerRect.left}px`;
+                }
+                if (height < 0) {
+                    selectionBox.style.top = `${e.clientY - containerRect.top}px`;
+                }
+            }
         });
+
+        document.addEventListener('mouseup', (e) => {
+            if (isMouseDown && selectionBox) {
+                isMouseDown = false;
+
+                // Get the coordinates of the selection box
+                const boxRect = selectionBox.getBoundingClientRect();
+                const plateContainer = document.querySelector('.plate-container');
+                const containerRect = plateContainer.getBoundingClientRect();
+
+                // Check which wells are inside or intersecting the selection box
+                document.querySelectorAll('.well').forEach(well => {
+                    const wellRect = well.getBoundingClientRect();
+
+                    // Check if the well is inside or partially intersects the selection box
+                    if (
+                        wellRect.left < boxRect.right &&   // Well is to the left of the right edge
+                        wellRect.right > boxRect.left &&   // Well is to the right of the left edge
+                        wellRect.top < boxRect.bottom &&   // Well is above the bottom edge
+                        wellRect.bottom > boxRect.top      // Well is below the top edge
+                    ) {
+                        well.classList.add('selected');
+                    }
+                });
+
+                // Remove the selection box after the selection
+                plateContainer.removeChild(selectionBox);
+                selectionBox = null;
+            }
+        });
+
+
 
         // Process button handler
-        document.querySelector('.process-button').addEventListener('click', () => {
-            const selectedWells = Array.from(document.querySelectorAll('.well.selected'))
-                .reduce((dict, well) => {
-                    dict[well.dataset.well] = true;
-                    return dict;
-                }, {});
-            
-            console.log('Selected Wells:', selectedWells);
-            alert(`Selected Wells:\n${Object.keys(selectedWells).join(', ')}`);
-        });
-    </script>
-    <script>
-        
-        // Replace all process button handlers with this single one
         document.querySelector('.process-button').addEventListener('click', async () => {
             const processBtn = document.querySelector('.process-button');
             try {
                 processBtn.disabled = true;
                 processBtn.textContent = 'Processing...';
-        
+
                 const selectedWells = Array.from(document.querySelectorAll('.well.selected'))
                                         .map(well => well.dataset.well);
                 
@@ -302,28 +363,24 @@
                     alert('Please upload a file first!');
                     return;
                 }
-        
+
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
-                formData.append('wells', JSON.stringify(selectedWells));
-        
-                const response = await fetch('http://localhost:5000/process', {
+                formData.append('selectedWells', JSON.stringify(selectedWells));
+
+                const response = await fetch('/upload', {
                     method: 'POST',
                     body: formData
                 });
-        
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Unknown error');
-                }
-        
+
                 const result = await response.json();
-                console.log('Result:', result);
-                alert(`Success: ${result.message}\nProcessed ${result.selected_wells.length} wells`);
-        
+                if (result.success) {
+                    alert('File processed successfully!');
+                } else {
+                    alert('Error processing file.');
+                }
             } catch (error) {
-                console.error('Error:', error);
-                alert(`Error: ${error.message}`);
+                alert('An error occurred while processing.');
             } finally {
                 processBtn.disabled = false;
                 processBtn.textContent = 'Process Data';
