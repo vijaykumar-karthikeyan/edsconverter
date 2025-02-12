@@ -59,6 +59,39 @@
             background-color: #0056b3;
         }
 
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .tag-colors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .tag-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .tag-color.selected {
+            border-color: #000;
+        }
+
+        .excel-input {
+            width: 100%;
+            height: 200px;
+            margin: 1rem 0;
+            padding: 0.5rem;
+        }
+
         .wells-section h3 {
             text-align: center;
             margin-bottom: 1rem;
@@ -159,6 +192,32 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
+        .tag-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        .tag-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+        }
+
+        .process-page, .configure-tags {
+            text-align: center;
+        }
+
+        .process-page h2, .configure-tags h2 {
+            margin-bottom: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -166,22 +225,26 @@
         <h1>EDS Converter</h1>
         
         <div class="upload-section">
-            <p id="instructionText">Drag or Upload Your EDS or CSV File</p>
-            <label class="upload-button">
-                Upload
-                <input type="file" id="fileInput" accept=".eds,.csv,text/csv" hidden>
-            </label>
+            <p id="instructionText">Drag and drop files here or click to select</p>
+            <input type="file" id="fileInput" style="display: none;" multiple>
+            <button class="upload-button" onclick="document.getElementById('fileInput').click()">Select Files</button>
         </div>
 
-        <div class="wells-section">
-            <h3>Choose Wells</h3>
-            <div class="plate-container">
-                <div class="row-labels"></div>
-                <div class="wells-grid"></div>
+        <div class="action-buttons">
+            <button class="upload-button" onclick="showProcessPage()">Process Data</button>
+            <button class="upload-button" onclick="showConfigureTags()">Configure Tags</button>
+        </div>
+
+        <div id="mainContent">
+            <div class="wells-section">
+                <h3>Choose Wells</h3>
+                <div class="plate-container">
+                    <div class="row-labels"></div>
+                    <div class="wells-grid"></div>
+                </div>
             </div>
         </div>
 
-        <button class="process-button">Process Data</button>
         <button class="nav-button" onclick="showTaggingPage()">Configure Tags</button>
     </div>
 
@@ -314,8 +377,13 @@
         document.querySelector('.process-button').addEventListener('click', processData);
         document.getElementById('fileInput').addEventListener('change', function(e) {
             document.getElementById('instructionText').textContent = this.files[0]?.name || 
-                'Drag or Upload Your EDS or CSV File';
+                'Drag and drop files here or click to select';
         });
+    </script>
+    <script src="tags.js"></script>
+    <script>
+        // Initialize the page
+        showMainPage();
     </script>
 </body>
 </html>
