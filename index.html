@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDS Converter with Well Plate</title>
+    <title>Raw Data Processing and Visualization</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -275,78 +275,94 @@
 
         // Mouse event handling for selection drag
 
+        let isSelecting = false;
+        let startX = 0;
+        let startY = 0;
+
         document.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.plate-container')) {
-                isMouseDown = true;
+            if (e.button !== 0) return;  // Only left-click
 
-                // Get the plate container's offset position
-                const plateContainer = document.querySelector('.plate-container');
-                const containerRect = plateContainer.getBoundingClientRect();
-                
-                // Create a selection box
-                selectionBox = document.createElement('div');
-                selectionBox.className = 'drag-selection';
-                plateContainer.appendChild(selectionBox);
+            // Start dragging
+            isMouseDown = true;
+            isSelecting = false; // Reset selection flag
 
-                // Set the initial position of the selection box based on mouse coordinates
-                selectionBox.style.left = `${e.clientX - containerRect.left}px`;
-                selectionBox.style.top = `${e.clientY - containerRect.top}px`;
-            }
+            // Record the starting mouse position
+            startX = e.pageX;
+            startY = e.pageY;
+
+            // Create a new selection box
+            selectionBox = document.createElement('div');
+            selectionBox.style.position = 'absolute';
+            selectionBox.style.border = '2px dashed rgba(0, 123, 255, 0.6)';
+            selectionBox.style.backgroundColor = 'rgba(0, 123, 255, 0.2)';
+            selectionBox.style.pointerEvents = 'none';  // Don't interfere with other clicks
+            document.body.appendChild(selectionBox);
+
+            // Set the starting point of the box
+            selectionBox.style.left = `${startX}px`;
+            selectionBox.style.top = `${startY}px`;
         });
 
         document.addEventListener('mousemove', (e) => {
             if (isMouseDown && selectionBox) {
-                const plateContainer = document.querySelector('.plate-container');
-                const containerRect = plateContainer.getBoundingClientRect();
-                
-                const width = e.clientX - containerRect.left - parseInt(selectionBox.style.left);
-                const height = e.clientY - containerRect.top - parseInt(selectionBox.style.top);
+                // Calculate the width and height of the box based on the direction of the drag
+                const width = e.pageX - startX;
+                const height = e.pageY - startY;
 
-                // Update the size of the selection box
+                // Adjust the box position to always start from the initial mouse position
+                selectionBox.style.left = `${Math.min(startX, e.pageX)}px`;
+                selectionBox.style.top = `${Math.min(startY, e.pageY)}px`;
                 selectionBox.style.width = `${Math.abs(width)}px`;
                 selectionBox.style.height = `${Math.abs(height)}px`;
 
-                // Adjust the starting point if the mouse moves left or up
-                if (width < 0) {
-                    selectionBox.style.left = `${e.clientX - containerRect.left}px`;
-                }
-                if (height < 0) {
-                    selectionBox.style.top = `${e.clientY - containerRect.top}px`;
-                }
+                // If dragging across, mark as selecting
+                isSelecting = true;
             }
         });
 
-        document.addEventListener('mouseup', (e) => {
-            if (isMouseDown && selectionBox) {
-                isMouseDown = false;
+        document.addEventListener('mouseup', () => {
+            if (!selectionBox) return;
+            
+            isMouseDown = false;
 
-                // Get the coordinates of the selection box
+            // Get selected wells within the box
+            const selectedWells = Array.from(document.querySelectorAll('.well')).filter(well => {
+                const wellRect = well.getBoundingClientRect();
                 const boxRect = selectionBox.getBoundingClientRect();
-                const plateContainer = document.querySelector('.plate-container');
-                const containerRect = plateContainer.getBoundingClientRect();
 
-                // Check which wells are inside or intersecting the selection box
-                document.querySelectorAll('.well').forEach(well => {
-                    const wellRect = well.getBoundingClientRect();
+                return (
+                    wellRect.left >= boxRect.left &&
+                    wellRect.right <= boxRect.right &&
+                    wellRect.top >= boxRect.top &&
+                    wellRect.bottom <= boxRect.bottom
+                );
+            });
 
-                    // Check if the well is inside or partially intersects the selection box
-                    if (
-                        wellRect.left < boxRect.right &&   // Well is to the left of the right edge
-                        wellRect.right > boxRect.left &&   // Well is to the right of the left edge
-                        wellRect.top < boxRect.bottom &&   // Well is above the bottom edge
-                        wellRect.bottom > boxRect.top      // Well is below the top edge
-                    ) {
-                        well.classList.add('selected');
-                    }
-                });
+            // Toggle selection state for each well (either select or unselect)
+            selectedWells.forEach(well => {
+                well.classList.toggle('selected'); // Toggle the 'selected' class
+            });
 
-                // Remove the selection box after the selection
-                plateContainer.removeChild(selectionBox);
+            // Remove the selection box after mouse up
+            document.body.removeChild(selectionBox);
+            selectionBox = null;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            if (selectionBox) {
+                // Remove selection box if mouse leaves the page
+                document.body.removeChild(selectionBox);
                 selectionBox = null;
+                isMouseDown = false;
             }
         });
 
-
+        // Keep the rest of the existing logic for clicking individual wells
+        document.querySelectorAll('.well').forEach(well => {
+            well.addEventListener('click', () => {
+                well.classList.toggle('selected');  // Toggle selected state on click
+            });
+        });
 
         // Process button handler
         document.querySelector('.process-button').addEventListener('click', async () => {
