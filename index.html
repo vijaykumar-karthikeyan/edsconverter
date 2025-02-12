@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raw Data Processing and Visualization</title>
+    <title>EDS Converter</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -43,15 +43,6 @@
             border-color: #007bff;
         }
 
-        .upload-section p {
-            margin: 0;
-            word-break: break-all;
-            padding: 8px;
-            min-height: 24px;
-            color: #666;
-            transition: color 0.3s ease;
-        }
-
         .upload-button {
             background-color: #007bff;
             color: white;
@@ -82,35 +73,14 @@
 
         .wells-grid {
             display: grid;
-            grid-template-columns: repeat(24, 30px); /* 24 columns for 384-well plate */
-            gap: 4px;
-            margin: 0 auto;  /* Center the grid */
-        }
-
-        .column-headers {
-            grid-column: 2;
-            display: grid;
             grid-template-columns: repeat(24, 30px);
             gap: 4px;
-            margin-bottom: 5px;
-            margin-left: 30px;
-        }
-
-        .column-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            font-size: 0.8em;
-            color: #666;
-            user-select: none;
         }
 
         .row-labels {
             width: 30px;
             display: grid;
-            grid-template-rows: repeat(16, 1fr); /* 16 rows for 384-well plate */
+            grid-template-rows: repeat(16, 30px);
             gap: 4px;
             padding-right: 10px;
         }
@@ -121,7 +91,6 @@
             justify-content: flex-end;
             font-size: 0.8em;
             color: #666;
-            user-select: none;
             height: 30px;
         }
 
@@ -145,7 +114,6 @@
         .well-label {
             font-size: 0.6em;
             color: #666;
-            user-select: none;
             pointer-events: none;
         }
 
@@ -162,44 +130,34 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 1.1rem;
-            transition: background-color 0.3s ease;
             margin-top: 1rem;
         }
 
-        .process-button:hover {
-            background-color: #218838;
+        .tagging-container {
+            display: none;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
         }
 
-        .drag-selection {
-            position: absolute;
-            border: 2px dashed #007bff;
-            background-color: rgba(0, 123, 255, 0.2);
-            pointer-events: none;
-            z-index: 10;
+        .tag-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
         }
 
-        @media (max-width: 768px) {
-            .well {
-                width: 20px;
-                height: 20px;
-            }
-            .well-label {
-                font-size: 0.5em;
-            }
-            .column-headers {
-                grid-template-columns: repeat(24, 20px);
-                margin-left: 20px;
-            }
-            .column-header {
-                width: 20px;
-                height: 20px;
-            }
-            .row-labels {
-                width: 20px;
-            }
-            .wells-grid {
-                grid-template-columns: repeat(24, 20px);
-            }
+        .nav-button {
+            margin: 1rem 0;
+            padding: 0.5rem 1rem;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -209,7 +167,6 @@
         
         <div class="upload-section">
             <p id="instructionText">Drag or Upload Your EDS or CSV File</p>
-            <div style="margin-bottom: 1.5rem;"></div>
             <label class="upload-button">
                 Upload
                 <input type="file" id="fileInput" accept=".eds,.csv,text/csv" hidden>
@@ -219,188 +176,145 @@
         <div class="wells-section">
             <h3>Choose Wells</h3>
             <div class="plate-container">
+                <div class="row-labels"></div>
                 <div class="wells-grid"></div>
             </div>
         </div>
 
         <button class="process-button">Process Data</button>
+        <button class="nav-button" onclick="showTaggingPage()">Configure Tags</button>
+    </div>
+
+    <div class="tagging-container">
+        <h2>Tag Configuration</h2>
+        <div class="tag-controls">
+            <input type="color" id="tagColor">
+            <input type="text" id="tagName" placeholder="Tag name">
+            <button onclick="createTag()">Create Tag</button>
+        </div>
+        <div class="tag-grid"></div>
+        <button class="nav-button" onclick="showMainPage()">Back</button>
+        <button class="process-button" onclick="saveTags()">Save Tags</button>
     </div>
 
     <script>
-        // File upload handling
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const instructionText = document.getElementById('instructionText');
-            if (this.files.length > 0) {
-                instructionText.textContent = this.files[0].name;
-                instructionText.style.color = '#333';
-            } else {
-                instructionText.textContent = 'Drag or Upload Your EDS or CSV File';
-                instructionText.style.color = '#666';
-            }
+        // Create 384-well plate grid
+        const rows = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+        const wellsGrid = document.querySelector('.wells-grid');
+        const rowLabels = document.querySelector('.row-labels');
+
+        // Create row labels
+        rows.forEach(row => {
+            const label = document.createElement('div');
+            label.className = 'row-label';
+            label.textContent = row;
+            rowLabels.appendChild(label);
         });
 
-        // Well plate creation for 384-well plate (16 rows, 24 columns)
-        const wellsGrid = document.querySelector('.wells-grid');
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];  // 16 rows
-        let isMouseDown = false;
-        let selectionBox = null;
-
-        rows.forEach((rowLabel) => {
-            for (let i = 1; i <= 24; i++) {  // 24 columns
+        // Create wells
+        rows.forEach(row => {
+            for(let col = 1; col <= 24; col++) {
                 const well = document.createElement('div');
                 well.className = 'well';
-                well.dataset.well = `${rowLabel}${i}`;
+                well.dataset.well = `${row}${col}`;
                 
-                // Add well label
-                const wellLabel = document.createElement('span');
-                wellLabel.className = 'well-label';
-                wellLabel.textContent = `${rowLabel}${i}`;
-                well.appendChild(wellLabel);
-
-                // Add event listeners for selection
-                well.addEventListener('mousedown', (e) => {
-                    isMouseDown = true;
-                    well.classList.toggle('selected');
-                });
-
-                well.addEventListener('mouseenter', (e) => {
-                    if (isMouseDown) {
-                        well.classList.toggle('selected');
-                    }
-                });
+                const label = document.createElement('span');
+                label.className = 'well-label';
+                label.textContent = `${row}${col}`;
+                well.appendChild(label);
 
                 wellsGrid.appendChild(well);
             }
         });
 
-        // Mouse event handling for selection drag
-
-        let isSelecting = false;
-        let startX = 0;
-        let startY = 0;
+        // Selection logic
+        let isMouseDown = false;
+        let initialSelectionState = false;
 
         document.addEventListener('mousedown', (e) => {
-            if (e.button !== 0) return;  // Only left-click
-
-            // Start dragging
-            isMouseDown = true;
-            isSelecting = false; // Reset selection flag
-
-            // Record the starting mouse position
-            startX = e.pageX;
-            startY = e.pageY;
-
-            // Create a new selection box
-            selectionBox = document.createElement('div');
-            selectionBox.style.position = 'absolute';
-            selectionBox.style.border = '2px dashed rgba(0, 123, 255, 0.6)';
-            selectionBox.style.backgroundColor = 'rgba(0, 123, 255, 0.2)';
-            selectionBox.style.pointerEvents = 'none';  // Don't interfere with other clicks
-            document.body.appendChild(selectionBox);
-
-            // Set the starting point of the box
-            selectionBox.style.left = `${startX}px`;
-            selectionBox.style.top = `${startY}px`;
+            if (e.target.classList.contains('well')) {
+                isMouseDown = true;
+                initialSelectionState = !e.target.classList.contains('selected');
+                e.target.classList.toggle('selected', initialSelectionState);
+            }
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (isMouseDown && selectionBox) {
-                // Calculate the width and height of the box based on the direction of the drag
-                const width = e.pageX - startX;
-                const height = e.pageY - startY;
-
-                // Adjust the box position to always start from the initial mouse position
-                selectionBox.style.left = `${Math.min(startX, e.pageX)}px`;
-                selectionBox.style.top = `${Math.min(startY, e.pageY)}px`;
-                selectionBox.style.width = `${Math.abs(width)}px`;
-                selectionBox.style.height = `${Math.abs(height)}px`;
-
-                // If dragging across, mark as selecting
-                isSelecting = true;
+        document.addEventListener('mouseover', (e) => {
+            if (isMouseDown && e.target.classList.contains('well')) {
+                e.target.classList.toggle('selected', initialSelectionState);
             }
         });
 
         document.addEventListener('mouseup', () => {
-            if (!selectionBox) return;
-            
             isMouseDown = false;
-
-            // Get selected wells within the box
-            const selectedWells = Array.from(document.querySelectorAll('.well')).filter(well => {
-                const wellRect = well.getBoundingClientRect();
-                const boxRect = selectionBox.getBoundingClientRect();
-
-                return (
-                    wellRect.left >= boxRect.left &&
-                    wellRect.right <= boxRect.right &&
-                    wellRect.top >= boxRect.top &&
-                    wellRect.bottom <= boxRect.bottom
-                );
-            });
-
-            // Toggle selection state for each well (either select or unselect)
-            selectedWells.forEach(well => {
-                well.classList.toggle('selected'); // Toggle the 'selected' class
-            });
-
-            // Remove the selection box after mouse up
-            document.body.removeChild(selectionBox);
-            selectionBox = null;
         });
 
-        document.addEventListener('mouseleave', () => {
-            if (selectionBox) {
-                // Remove selection box if mouse leaves the page
-                document.body.removeChild(selectionBox);
-                selectionBox = null;
-                isMouseDown = false;
-            }
-        });
+        // Tagging functionality
+        let tags = {};
 
-        // Keep the rest of the existing logic for clicking individual wells
-        document.querySelectorAll('.well').forEach(well => {
-            well.addEventListener('click', () => {
-                well.classList.toggle('selected');  // Toggle selected state on click
-            });
-        });
+        function showTaggingPage() {
+            document.querySelector('.container').style.display = 'none';
+            document.querySelector('.tagging-container').style.display = 'block';
+            populateTagGrid();
+        }
 
-        // Process button handler
-        document.querySelector('.process-button').addEventListener('click', async () => {
-            const processBtn = document.querySelector('.process-button');
+        function showMainPage() {
+            document.querySelector('.container').style.display = 'block';
+            document.querySelector('.tagging-container').style.display = 'none';
+        }
+
+        function populateTagGrid() {
+            const selectedWells = Array.from(document.querySelectorAll('.well.selected'))
+                                    .map(w => w.dataset.well);
+            const grid = document.querySelector('.tag-grid');
+            grid.innerHTML = selectedWells.map(well => `
+                <div class="tag-row">
+                    <span>${well}</span>
+                    <input type="text" data-well="${well}" placeholder="Tag name">
+                    <input type="color" data-well="${well}">
+                </div>
+            `).join('');
+        }
+
+        async function processData() {
+            const selectedWells = Array.from(document.querySelectorAll('.well.selected'))
+                                    .map(w => w.dataset.well);
+            const tagData = Array.from(document.querySelectorAll('.tag-row')).reduce((acc, row) => {
+                const well = row.querySelector('span').textContent;
+                const tag = row.querySelector('input[type="text"]').value;
+                if (tag) acc[well] = tag;
+                return acc;
+            }, {});
+
+            const fileInput = document.getElementById('fileInput');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('wells', JSON.stringify(selectedWells));
+            formData.append('tags', JSON.stringify(tagData));
+
             try {
-                processBtn.disabled = true;
-                processBtn.textContent = 'Processing...';
-
-                const selectedWells = Array.from(document.querySelectorAll('.well.selected'))
-                                        .map(well => well.dataset.well);
-                
-                const fileInput = document.getElementById('fileInput');
-                if (!fileInput.files[0]) {
-                    alert('Please upload a file first!');
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-                formData.append('selectedWells', JSON.stringify(selectedWells));
-
-                const response = await fetch('/upload', {
+                const response = await fetch('/process', {
                     method: 'POST',
                     body: formData
                 });
-
-                const result = await response.json();
-                if (result.success) {
-                    alert('File processed successfully!');
-                } else {
-                    alert('Error processing file.');
-                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `processed_${Date.now()}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             } catch (error) {
-                alert('An error occurred while processing.');
-            } finally {
-                processBtn.disabled = false;
-                processBtn.textContent = 'Process Data';
+                console.error('Error:', error);
             }
+        }
+
+        // Event listeners
+        document.querySelector('.process-button').addEventListener('click', processData);
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            document.getElementById('instructionText').textContent = this.files[0]?.name || 
+                'Drag or Upload Your EDS or CSV File';
         });
     </script>
 </body>
