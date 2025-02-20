@@ -1,0 +1,35 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build  # Builds the project to 'dist' (or your specified folder)
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: build  # Specify the branch (e.g., 'build' or 'gh-pages') where the build should be deployed
+          folder: dist    # Folder with the build output (e.g., dist)
+          token: ${{ secrets.PAT }}  # Use your GitHub Personal Access Token (PAT)
+          clean: true  # Cleans the branch before deploying (optional but recommended)
