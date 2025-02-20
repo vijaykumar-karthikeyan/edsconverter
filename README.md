@@ -1,7 +1,8 @@
-# edsconverter
+# React + Vite
 
-Desktop Application powered by Electron JS. 
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Taking EDS or CSV files (data obtained from Thermo Fisher QuantStudio PCR System) and converting them into usable data files.
+Currently, two official plugins are available:
 
-Data is filter based on the wells in the well plates used and can be downloaded for further analysis of data.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh

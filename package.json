@@ -1,25 +1,32 @@
 {
-  "name": "edsconverter",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
+  "name": "kinetic-data",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "concurrently \"electron .\" \"python app.py\""
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vijaykumar-karthikeyan/edsconverter.git"
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/vijaykumar-karthikeyan/edsconverter/issues"
-  },
-  "homepage": "https://github.com/vijaykumar-karthikeyan/edsconverter#readme",
   "devDependencies": {
-    "concurrently": "^9.1.2",
-    "electron": "^34.1.1"
-  }
+    "@eslint/js": "^9.19.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.19.0",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^15.14.0",
+    "vite": "^6.1.0",
+    "gh-pages": "^3.2.3"
+  },
+  "homepage": "https://vijaykumar-karthikeyan.github.io/kinetic-data"
 }
