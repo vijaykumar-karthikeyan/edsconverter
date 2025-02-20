@@ -2,34 +2,45 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main  # Trigger the workflow on pushes to the main branch
+    branches: [ "main" ]
+
+# Allow write access to GitHub Pages
+permissions:
+  contents: write
+  pages: write  # Add this
+  id-token: write  # Add this
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build project
-        run: npm run build  # Builds the project to 'dist' (or your specified folder)
+      - name: Build
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: build  # Specify the branch (e.g., 'build' or 'gh-pages') where the build should be deployed
-          folder: dist    # Folder with the build output (e.g., dist)
-          token: ${{ secrets.PAT }}  # Use your GitHub Personal Access Token (PAT)
-          clean: true  # Cleans the branch before deploying (optional but recommended)
+        id: deployment
+        uses: actions/deploy-pages@v4
