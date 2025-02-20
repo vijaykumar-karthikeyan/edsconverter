@@ -15,6 +15,9 @@ body {
   color: #212529;
   line-height: 1.6;
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 2rem;
 }
 
@@ -23,90 +26,139 @@ body {
 /* ------------------------- */
 .app-container {
   max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
   background: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   border: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
 }
 
 .title {
   font-size: 2rem;
   color: #1a1a1a;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   font-weight: 700;
   letter-spacing: -0.5px;
   text-align: center;
 }
 
 /* ------------------------- */
-/* File Input Styling        */
+/* Drag & Drop Upload Area   */
 /* ------------------------- */
-.file-input-container {
-  margin-bottom: 2rem;
-  display: flex;
-  justify-content: center;
-}
-
-#fileInput {
-  padding: 0.8rem 1.5rem;
-  border: 2px solid #dee2e6;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  background: #fff;
-  cursor: pointer;
+.file-upload-section {
   width: 100%;
-  max-width: 300px;
-  color: #495057;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: #fcfdff;
+  position: relative;
+  cursor: pointer;
 }
 
-#fileInput:hover {
-  border-color: #adb5bd;
-}
-
-#fileInput:focus {
-  outline: none;
+.file-upload-section.dragover {
   border-color: #4dabf7;
-  box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.2);
+  background-color: rgba(77, 171, 247, 0.05);
+  transform: translateY(-2px);
+}
+
+.file-upload-section.error {
+  border-color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.05);
+}
+
+.custom-file-input {
+  padding: 0.8rem 1.8rem;
+  background: #4dabf7;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-file-input:hover {
+  background: #228be6;
+  transform: translateY(-1px);
+}
+
+.file-instructions {
+  color: #6c757d;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.selected-file {
+  margin-top: 1rem;
+  color: #495057;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* ------------------------- */
-/* Well Plate Grid           */
+/* Centered Well Plate Grid  */
 /* ------------------------- */
+.wellplate-wrapper {
+  width: 100%;
+  min-width: 960px; /* Set a minimum width based on the 24 columns */
+  height: 100%; /* Ensure the wrapper takes up full height of the available space */
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex; /* Center content horizontally and vertically */
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+.wellplate {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr)); /* 24 columns, dynamically sized */
+  grid-template-rows: repeat(16, minmax(0, 1fr)); /* 16 rows, dynamically sized */
+  gap: 2px; /* Space between the wells */
+  width: 100%;
+  height: 100%;
+  max-width: 100%; /* Prevent overflow */
+  max-height: 100%; /* Prevent overflow */
+  align-items: center; /* Center wells in the available space */
+  justify-items: center; /* Center wells in each grid cell */
+}
+
 .grid-container {
   display: grid;
   gap: 6px;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border: 1px solid #e9ecef;
   position: relative;
-  overflow: hidden;
-}
-
-.grid-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-  z-index: 0;
 }
 
 /* ------------------------- */
 /* Individual Well Styling   */
 /* ------------------------- */
 .well {
-  width: 35px;
-  height: 35px;
-  border: 2px solid #dee2e6;
-  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #495057;
   background: #ffffff;
@@ -117,37 +169,62 @@ body {
 
 .well:hover {
   transform: translateY(-2px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-  border-color: #adb5bd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border-color: #ced4da;
 }
 
 .well.selected {
   background-color: #4dabf7;
   border-color: #228be6;
   color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
   animation: wellSelect 0.3s ease;
+}
+
+/* ------------------------- */
+/* Progress & Status         */
+/* ------------------------- */
+.upload-status {
+  margin-top: 1rem;
+  color: #4dabf7;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: #4dabf7;
+  transition: width 0.3s ease;
 }
 
 /* ------------------------- */
 /* Animations                */
 /* ------------------------- */
 @keyframes wellSelect {
-  0% {
-    transform: scale(0.95);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ------------------------- */
 /* Responsive Design         */
 /* ------------------------- */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   body {
     padding: 1rem;
   }
@@ -161,8 +238,20 @@ body {
   }
 
   .well {
-    width: 30px;
-    height: 30px;
-    font-size: 0.75rem;
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
+  .file-upload-section {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .well {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
   }
 }
