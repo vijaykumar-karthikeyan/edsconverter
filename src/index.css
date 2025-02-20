@@ -66,3 +66,62 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.container {
+  text-align: center;
+  padding: 20px;
+}
+
+.upload-section {
+  margin-bottom: 20px;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.wells-section {
+  margin-top: 20px;
+}
+
+.plate-container {
+  display: flex;
+  justify-content: center;
+}
+
+.wells-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 35px);
+  gap: 5px;
+  padding: 10px;
+}
+
+.well {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+.well.selected {
+  background-color: blue;
+  color: white;
+}
+
+.process-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: green;
+  color: white;
+  border: none;
+  cursor: pointer;
+}

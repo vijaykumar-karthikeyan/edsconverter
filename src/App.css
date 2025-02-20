@@ -40,3 +40,25 @@
 .read-the-docs {
   color: #888;
 }
+
+.wells-grid {
+  display: grid;
+  grid-template-columns: repeat(24, 30px);
+  grid-gap: 5px;
+  padding: 10px;
+}
+
+.well {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+.well.selected {
+  background-color: blue;
+  color: white;
+}
