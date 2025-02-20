@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import WellPlate from './renderer';
+import WellPlate from './components/WellPlate';
+import './styles/app.css';
 
 const App = () => {
   const [fileName, setFileName] = useState('');
@@ -39,7 +40,7 @@ const App = () => {
 
   return (
     <div className="container">
-      <h1>EDS Converter</h1>
+      <h1>Kinetic Data Processing</h1>
 
       <div className="upload-section">
         <p>{fileName || 'Drag or Upload Your EDS File'}</p>
