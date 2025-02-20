@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 // Functional component that creates a grid of clickable wells
-export default function WellPlate({ rows = 8, cols = 12 }) {
+export default function WellPlate({ rows = 16, cols = 24 }) {
   // State to track selected wells using a Set for efficient lookups
   const [selectedWells, setSelectedWells] = useState(new Set());
 
